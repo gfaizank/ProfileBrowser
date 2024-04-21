@@ -1,11 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../components/navbar";
+
 
 function Browse() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectAll, setSelectAll] = useState(false);
   const [selectedCheckboxes, setSelectedCheckboxes] = useState({});
+
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    // Fetch data from the API when the component mounts
+    fetch("http://localhost:8000/people/allPeople")
+      .then((response) => response.json())
+      .then((data) => setUsers(data))
+      .catch((error) => console.error("Error fetching data:", error));
+  }, []);
 
   const handleDropdownToggle = () => setDropdownOpen(!dropdownOpen);
 
@@ -29,48 +40,6 @@ function Browse() {
     });
   };
 
-  const users = [
-    {
-      id: 1,
-      name: "Neil Sims",
-      email: "neil.sims@flowbite.com",
-      role: "React Developer",
-      status: "Online",
-      profilePic: "/docs/images/people/profile-picture-1.jpg",
-    },
-    {
-      id: 2,
-      name: "Bonnie Green",
-      email: "bonnie@flowbite.com",
-      role: "Designer",
-      status: "Online",
-      profilePic: "/docs/images/people/profile-picture-3.jpg",
-    },
-    {
-      id: 3,
-      name: "Jese Leos",
-      email: "jese@flowbite.com",
-      role: "Vue JS Developer",
-      status: "Online",
-      profilePic: "/docs/images/people/profile-picture-2.jpg",
-    },
-    {
-      id: 4,
-      name: "Thomas Lean",
-      email: "thomas@flowbite.com",
-      role: "UI/UX Engineer",
-      status: "Online",
-      profilePic: "/docs/images/people/profile-picture-5.jpg",
-    },
-    {
-      id: 5,
-      name: "Leslie Livingston",
-      email: "leslie@example.com",
-      role: "Software Engineer",
-      status: "Online",
-      profilePic: "/docs/images/people/profile-picture-4.jpg",
-    },
-  ];
   return (
     <div className="flex flex-col">
       <Navbar />
@@ -121,72 +90,81 @@ function Browse() {
       </div>
 
       <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-        <thead className="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-          <tr>
-            <th scope="col" className="p-4">
-              <div className="flex items-center">
-                <input
-                  id="checkbox-all-search"
-                  type="checkbox"
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                  checked={selectAll}
-                  onChange={handleSelectAllChange}
-                />
-                <label htmlFor="checkbox-all-search" className="sr-only">checkbox</label>
-              </div>
-            </th>
-            <th scope="col" className="px-6 py-3">
-              Name
-            </th>
-            <th scope="col" className="px-6 py-3">
-              Position
-            </th>
-            <th scope="col" className="px-6 py-3">
-              Status
-            </th>
-            <th scope="col" className="px-6 py-3">
-              Action
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map(user => (
-            <tr key={user.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-              <td className="w-4 p-4">
+          <thead className="text-xs uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+              <th scope="col" className="p-4">
                 <div className="flex items-center">
                   <input
-                    id={`checkbox-table-search-${user.id}`}
+                    id="checkbox-all-search"
                     type="checkbox"
                     className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                    checked={selectedCheckboxes[user.id] || false}
-                    onChange={() => handleCheckboxChange(user.id)}
+                    checked={selectAll}
+                    onChange={handleSelectAllChange}
                   />
-                  <label htmlFor={`checkbox-table-search-${user.id}`} className="sr-only">checkbox</label>
-                </div>
-              </td>
-              <th scope="row" className="flex items-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                <img className="w-10 h-10 rounded-full" src={user.profilePic} alt={`${user.name}'s profile`} />
-                <div className="pl-3">
-                  <div className="text-base font-semibold">{user.name}</div>
-                  <div className="text-gray-500">{user.email}</div>
+                  <label htmlFor="checkbox-all-search" className="sr-only">checkbox</label>
                 </div>
               </th>
-              <td className="px-6 py-4">
-                {user.role}
-              </td>
-              <td className="px-6 py-4">
-                <div className="flex items-center">
-                  <div className={`h-2.5 w-2.5 rounded-full ${user.status === 'Online' ? 'bg-green-500' : 'bg-red-500'} me-2`} />
-                  {user.status}
-                </div>
-              </td>
-              <td className="px-6 py-4">
-                <a href="#" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit user</a>
-              </td>
+              <th scope="col" className="px-6 py-3">
+                Name
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Location
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Field of Interest
+              </th>
+              {/* <th scope="col" className="px-6 py-3">
+                Gravatar
+              </th> */}
+              <th scope="col" className="px-6 py-3">
+                Status
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Action
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {users.map(user => (
+              <tr key={user.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                <td className="w-4 p-4">
+                  <div className="flex items-center">
+                    <input
+                      id={`checkbox-table-search-${user.id}`}
+                      type="checkbox"
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                      checked={selectedCheckboxes[user.id] || false}
+                      onChange={() => handleCheckboxChange(user.id)}
+                    />
+                    <label htmlFor={`checkbox-table-search-${user.id}`} className="sr-only">checkbox</label>
+                  </div>
+                </td>
+                <th scope="row" className="flex items-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                  <img className="w-10 h-10 rounded-full" src={user.gravatar} alt={`${user.name}'s profile`} />
+                  <div className="pl-3">
+                    <div className="text-base font-semibold">{user.username}</div>
+                    <div className="text-gray-500">{user.email}</div>
+                  </div>
+                </th>
+                <td className="px-6 py-4">
+                  {user.location}
+                </td>
+                <td className="px-6 py-4">
+                  {user.fieldOfInterest[0]}
+                </td>
+                {/* <td className="px-6 py-4">
+                  <img src={user.gravatar} alt={`${user.name}'s gravatar`} className="w-10 h-10 rounded-full" />
+                </td> */}
+                <td className="px-6 py-4">
+                  {user.status}
+                </td>
+                <td className="px-6 py-4">
+                  <a href="#" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit user</a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
     </div>
     </div>
   );

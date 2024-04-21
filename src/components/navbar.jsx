@@ -1,20 +1,43 @@
-import React from 'react'
-import { Menu, X } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import React, { useState } from "react";
+import { Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import DeleteConfirmationModal from "./deleteModal";
+import { useLogout } from "../hooks/useLogout";
+import { useAuthContext } from "../hooks/useAuthContext";
 
 const menuItems = [
-    {
-      name: 'Home',
-      to: '/home',
-    },
-  ]
+  {
+    name: "Home",
+    to: "/home",
+  },
+];
 
 function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false)
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+
+  const { logout } = useLogout();
+
+  const { user } = useAuthContext();
+
+  const [showModal, setShowModal] = useState(false);
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen)
-  }
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleDeleteClick = (event) => {
+    event.preventDefault();
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  const handleConfirmDelete = () => {
+    setShowModal(false);
+    logout();
+  };
 
   return (
     <div className="relative w-full pt-2 bg-white">
@@ -52,25 +75,39 @@ function Navbar() {
         </div>
         <div className="hidden lg:block">
           <Link to="/browse">
-          <button
-            type="button"
-            className="rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
-          >
-            Browse Students
-          </button>
+            <button
+              type="button"
+              className="rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+            >
+              Browse Students
+            </button>
+          </Link>
+          <Link to="/edit-profile">
+            <button
+              type="button"
+              className="rounded-md ml-4 bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+            >
+              Edit Profile
+            </button>
           </Link>
           <button
             type="button"
             className="rounded-md ml-4 bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
-          >
-            Edit Profile
-          </button>
-          <button
-            type="button"
-            className="rounded-md ml-4 bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+            onClick={handleDeleteClick}
           >
             Logout
           </button>
+          {showModal && user && (
+                  <div className="fixed top-0 left-0 flex h-full w-full items-center justify-center">
+                    <div className="absolute top-0 h-[700px] w-full bg-gray-900 opacity-50"></div>
+                    <div className="z-50 rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
+                      <DeleteConfirmationModal
+                        onClose={handleCloseModal}
+                        onConfirm={handleConfirmDelete}
+                      />
+                    </div>
+                  </div>
+                )}
         </div>
         <div className="lg:hidden">
           <Menu onClick={toggleMenu} className="h-6 w-6 cursor-pointer" />
@@ -138,16 +175,28 @@ function Navbar() {
                 <button
                   type="button"
                   className="mt-4 w-full rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                  onClick={handleDeleteClick}
                 >
                   Logout
                 </button>
+                {showModal && user && (
+                  <div className="fixed top-0 left-0 flex h-full w-full items-center justify-center">
+                    <div className="absolute top-0 h-[700px] w-full bg-gray-900 opacity-50"></div>
+                    <div className="z-50 rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
+                      <DeleteConfirmationModal
+                        onClose={handleCloseModal}
+                        onConfirm={handleConfirmDelete}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default Navbar
+export default Navbar;
