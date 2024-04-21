@@ -3,6 +3,7 @@ import { useAuthContext } from './useAuthContext';
 import { useNavigate } from "react-router-dom";
 
 
+
 export const useLogin = () => {
   const [error, setError] = useState(null)
   const [isLoading, setIsLoading] = useState(null)
@@ -29,9 +30,12 @@ export const useLogin = () => {
       localStorage.setItem('user', JSON.stringify(json))
 
       // update the auth context
-      dispatch({type: 'LOGIN', payload: json})
-
+      
+        dispatch({type: 'LOGIN', payload: json})
+      
+      setTimeout(()=>{
       navigate("/home");
+    }, 3000)
 
       // update loading state
       setIsLoading(false)

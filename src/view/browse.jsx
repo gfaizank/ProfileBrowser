@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/navbar";
+import { MdDelete } from "react-icons/md";
 
 
 function Browse() {
@@ -158,8 +159,9 @@ function Browse() {
                 <td className="px-6 py-4">
                   {user.status}
                 </td>
-                <td className="px-6 py-4">
+                <td className="flex flex-row items-center px-6 py-4">
                   <a href="#" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit user</a>
+                  <MdDelete className="ml-2 text-red-500 text-lg hover:text-red-300 cursor-pointer" />
                 </td>
               </tr>
             ))}

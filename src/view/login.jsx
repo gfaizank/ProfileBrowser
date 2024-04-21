@@ -3,6 +3,8 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLogin } from "../hooks/useLogin";
 import Spinner from "../components/spinner";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -16,15 +18,22 @@ function Login() {
   };
 
   const handleSubmit = async (e) => {
+
     setSpin(true);
     e.preventDefault();
 
-    console.log(formData);
-    await login(username, password);
-    setSpin(false);
+    try {
+      await login(username, password);
+      setSpin(false);
+      toast.success("Login successful!");
+    } catch (error) {
+      setSpin(false);
+      toast.error("Error: " + error.message);
+    }
   };
   return (
     <section>
+      <ToastContainer />
       <div className="lg:mt-24 grid grid-cols-1 lg:grid-cols-2">
         <div className="flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
           <div className="xl:mx-auto xl:w-full xl:max-w-sm 2xl:max-w-md">

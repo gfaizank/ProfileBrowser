@@ -1,17 +1,102 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaCirclePlus } from "react-icons/fa6";
+import Multiselect from "./multiSelect";
+import { useAuthContext } from "../hooks/useAuthContext";
+import Spinner from "./spinner";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function ProfileComponent() {
-  const seekingOptions = [
-    { value: "Internship", label: "Internship" },
-    { value: "Remote", label: "Remote" },
-    { value: "FT Position", label: "FT Position" },
-    { value: "Not Seeking", label: "Not Seeking" },
-  ];
+  const interestList = ["Engineering", "Security", "Management"];
+  const seekingList = ["Internship", "Remote", "FT Position", "Not seeking"];
+  const techList = ["Ruby", "Rails", "Javascript", "Html/Css3"];
 
+  const [selectedInterestItems, setSelectedInterestItems] = useState([]);
+  const [selectedSeekingItems, setSelectedSeekingItems] = useState([]);
+  const [selectedTechItems, setSelectedTechItems] = useState([]);
+  const [spin, setSpin] = useState(false);
+
+  const { user } = useAuthContext();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    name: "",
+    gravatar: "",
+    techStack: selectedTechItems,
+    location: "",
+    fieldOfInterest: selectedInterestItems,
+    seeking: selectedSeekingItems,
+    bio: "",
+    githubURL: "",
+    twitterURL: "",
+    website_URL: "",
+    linkedinURL: "",
+  });
+
+  const handleSelectedChange = (items, type) => {
+    switch (type) {
+      case "Interest":
+        setSelectedInterestItems(items);
+        break;
+      case "Seeking":
+        setSelectedSeekingItems(items);
+        break;
+      case "TechStack":
+        setSelectedTechItems(items);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleFormDataChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async () => {
+    setSpin(true);
+    try {
+      const response = await fetch("http://localhost:8000/people/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        toast.success("Success");
+        setTimeout(() => {
+          setSpin(false);
+        }, 5000);
+        console.log("Form data submitted successfully!");
+        console.log(formData);      
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message);
+        setTimeout(() => {
+          setSpin(false);
+        }, 5000);
+        console.error("Failed to submit form data");
+        console.log(formData);
+      }
+    } catch (error) {
+      toast.error("Error occurred while submitting form data");
+      setTimeout(() => {
+        setSpin(false);
+      }, 5000);
+      console.error("Error occurred while submitting form data:", error);
+      console.log(formData);
+    }
+  };
+
+  console.log(selectedInterestItems, selectedSeekingItems, selectedTechItems);
 
   return (
     <div className="flex flex-col">
+      <ToastContainer />
       <h1 className="ml-32 text-3xl font-bold mt-4">Academy Student Sign up</h1>
 
       <div className="flex flex-row ml-36 mt-8">
@@ -26,6 +111,8 @@ function ProfileComponent() {
                 id="name"
                 placeholder="Your name"
                 className="border rounded-md ml-4 px-2 py-1 text-gray-400"
+                value={formData.name}
+                onChange={handleFormDataChange}
               />
             </div>
 
@@ -47,6 +134,8 @@ function ProfileComponent() {
               id="email"
               placeholder="Your email"
               className="border rounded-md ml-5 px-2 py-1 text-gray-400"
+              value={formData.email}
+              onChange={handleFormDataChange}
             />
           </div>
 
@@ -108,6 +197,8 @@ function ProfileComponent() {
               id="github"
               placeholder="Your github"
               className="border rounded-md ml-4 px-2 py-1 text-gray-400"
+              value={formData.githubURL}
+              onChange={handleFormDataChange}
             />
           </div>
 
@@ -121,6 +212,8 @@ function ProfileComponent() {
                 id="website"
                 placeholder="Your website"
                 className="border rounded-md ml-4 px-2 py-1 text-gray-400"
+                value={formData.website_URL}
+                onChange={handleFormDataChange}
               />
             </div>
 
@@ -132,6 +225,8 @@ function ProfileComponent() {
                 id="location"
                 placeholder="Your location"
                 className="border rounded-md ml-2 px-2 py-1 text-gray-400"
+                value={formData.location}
+                onChange={handleFormDataChange}
               />
             </div>
           </div>
@@ -145,6 +240,8 @@ function ProfileComponent() {
               id="bio"
               placeholder="Your bio"
               className="border rounded-md ml-4 px-2 py-1 text-gray-400 w-[512px]"
+              value={formData.bio}
+              onChange={handleFormDataChange}
             />
           </div>
         </div>
@@ -167,60 +264,47 @@ function ProfileComponent() {
 
           <div className="flex flex-row text-center items-center mt-8 ml-8">
             <h1 className="mt-1">Interest</h1>
-            <select
-              id="interest"
-              name="interest"
-              className="block w-full ml-8 rounded-lg border border-gray-300 bg-gray-50 px-2 py-1.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-              required
-              multiple
-            >
-              <option disabled>Choose an interest</option>
-              <option value="Engineering">Engineering</option>
-              <option value="Security">Security</option>
-              <option value="Management">Management</option>
-            </select>
+            <Multiselect
+              items={interestList}
+              onSelectedChange={(items) =>
+                handleSelectedChange(items, "Interest")
+              }
+            />
           </div>
 
           {/* seeking */}
 
-          <div className="flex flex-row text-center mt-8 ml-8">
+          <div className="flex flex-row text-center items-center mt-8 ml-8">
             <h1 className="mt-1">Seeking</h1>
-            <select
-              id="seeking"
-              name="seeking"
-              className="block w-full ml-8 rounded-lg border border-gray-300 bg-gray-50 px-2 py-1.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-              required
-              multiple 
-            >
-              
-              <option disabled>Choose roles (multiple)</option>
-              <option value="Internship">Internship</option>
-              <option value="Remote">Remote</option>
-              <option value="FT Position">FT Position</option>
-              <option value="Not Seeking">Not Seeking</option>
-            </select>
+            <Multiselect
+              items={seekingList}
+              onSelectedChange={(items) =>
+                handleSelectedChange(items, "Seeking")
+              }
+            />
           </div>
 
           {/* techstack */}
-          <div className="flex flex-row text-center mt-8 ml-8">
+          <div className="flex flex-row text-center items-center mt-8 ml-8">
             <h1 className="mt-1">TechStack</h1>
-            <select
-              id="techStack"
-              name="techStack"
-              className="block w-full ml-8 rounded-lg border border-gray-300 bg-gray-50 px-2 py-1.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-              required
-              multiple
+            <Multiselect
+              items={techList}
+              onSelectedChange={(items) =>
+                handleSelectedChange(items, "TechStack")
+              }
+            />
+          </div>
+
+          <div className="flex items-center justify-center mt-8 ml-8">
+            <button
+              onClick={handleSubmit}
+              className="rounded-lg border bg-black text-white px-2 py-2 w-full hover:bg-gray-700"
             >
-              <option disabled >Choose a Tech Stack</option>
-              <option value="Ruby">Ruby</option>
-              <option value="Rails">Rails</option>
-              <option value="Javascript">Javascript</option>
-              <option value="Html/Css3">Html/Css3</option>
-            </select>
+              {spin && <Spinner />}
+              {!spin && "Create Profile"}
+            </button>
           </div>
         </div>
-        <div></div>
-        <div></div>
       </div>
     </div>
   );
