@@ -5,6 +5,7 @@ import { useAuthContext } from "../hooks/useAuthContext";
 import Spinner from "./spinner";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { MdDelete } from "react-icons/md";
 
 function ProfileComponent() {
   const interestList = ["Engineering", "Security", "Management"];
@@ -55,10 +56,19 @@ function ProfileComponent() {
   };
 
   const handleSubmit = async () => {
+
+    if (!validateEmail(formData.email)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    if (!validateURL(formData.website_URL)) {
+      toast.error("Please enter a valid website URL.");
+      return;
+    }
     setSpin(true);
     try {
-      const response = await fetch("http://localhost:8000/people/create", {
-        method: "POST",
+      const response = await fetch(`http://localhost:8000/people/update/${user.user._id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${user.token}`,
@@ -67,7 +77,7 @@ function ProfileComponent() {
       });
 
       if (response.ok) {
-        toast.success("Success");
+        toast.success("Profile succesfully updated");
         setTimeout(() => {
           setSpin(false);
         }, 5000);
@@ -86,13 +96,62 @@ function ProfileComponent() {
       toast.error("Error occurred while submitting form data");
       setTimeout(() => {
         setSpin(false);
-      }, 5000);
+      }, 2000);
       console.error("Error occurred while submitting form data:", error);
       console.log(formData);
     }
   };
 
   console.log(selectedInterestItems, selectedSeekingItems, selectedTechItems);
+
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete your profile?")) {
+      return;
+    }
+
+    setSpin(true);
+    try {
+      const response = await fetch(`http://localhost:8000/people/delete/${user.user._id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+
+      if (response.ok) {
+        toast.success("Profile successfully deleted");
+        setSpin(false);
+        
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message);
+        setSpin(false);
+      }
+    } catch (error) {
+      toast.error("Error occurred while deleting the profile");
+      setSpin(false);
+    }
+  };
+
+  const validateEmail = (email) => {
+    if (email.trim() === "") {
+      return true;
+    }
+    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return pattern.test(email);
+  };
+
+  const validateURL = (url) => {
+    if (!url || typeof url !== "string" || url.trim() === "") {
+      return true; 
+    }
+  
+    const trimmedURL = url.trim();
+    const pattern = /^(ftp|http|https):\/\/(www\.)?[^ "]+$/;
+    return pattern.test(trimmedURL);
+  };
+  
 
   return (
     <div className="flex flex-col">
@@ -193,7 +252,7 @@ function ProfileComponent() {
             <h1 className="mt-1">Github</h1>
             <input
               type="text"
-              name="github"
+              name="githubURL"
               id="github"
               placeholder="Your github"
               className="border rounded-md ml-4 px-2 py-1 text-gray-400"
@@ -208,7 +267,7 @@ function ProfileComponent() {
               <h1 className="mt-1">Website</h1>
               <input
                 type="url"
-                name="website"
+                name="website_URL"
                 id="website"
                 placeholder="Your website"
                 className="border rounded-md ml-4 px-2 py-1 text-gray-400"
@@ -295,14 +354,15 @@ function ProfileComponent() {
             />
           </div>
 
-          <div className="flex items-center justify-center mt-8 ml-8">
+          <div className="flex flex-row items-center justify-center mt-8 ml-8">
             <button
               onClick={handleSubmit}
               className="rounded-lg border bg-black text-white px-2 py-2 w-full hover:bg-gray-700"
             >
               {spin && <Spinner />}
-              {!spin && "Create Profile"}
+              {!spin && "Submit Profile"}
             </button>
+            <MdDelete onClick={handleDelete} className="text-4xl ml-4 text-red-500 hover:text-red-300 cursor-pointer" />
           </div>
         </div>
       </div>

@@ -35,7 +35,7 @@ export const useLogin = () => {
       
       setTimeout(()=>{
       navigate("/home");
-    }, 3000)
+    }, 1500)
 
       // update loading state
       setIsLoading(false)

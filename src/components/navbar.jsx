@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import DeleteConfirmationModal from "./deleteModal";
 import { useLogout } from "../hooks/useLogout";
 import { useAuthContext } from "../hooks/useAuthContext";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const menuItems = [
   {
@@ -34,13 +36,20 @@ function Navbar() {
     setShowModal(false);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     setShowModal(false);
-    logout();
-  };
+      try {
+        await logout();
+        toast.success("Logout successful!");
+      } catch (error) {
+        toast.error("Error: " + error.message);
+      }
+    
+};
 
   return (
-    <div className="relative w-full pt-2 bg-white">
+    <div className="relative w-full pt-2 bg-white z-20">
+      <ToastContainer />
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:px-8">
         <div className="inline-flex items-center space-x-2">
           <span>
@@ -74,6 +83,9 @@ function Navbar() {
           </ul>
         </div>
         <div className="hidden lg:block">
+          {user!==null ?
+          (
+            <>
           <Link to="/browse">
             <button
               type="button"
@@ -97,6 +109,18 @@ function Navbar() {
           >
             Logout
           </button>
+          </>):(
+            
+            <Link to="/">
+            <button
+              type="button"
+              className="rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+            >
+              Log In
+            </button>
+          </Link>
+          )
+}
           {showModal && user && (
                   <div className="fixed top-0 left-0 flex h-full w-full items-center justify-center">
                     <div className="absolute top-0 h-[700px] w-full bg-gray-900 opacity-50"></div>
@@ -160,25 +184,35 @@ function Navbar() {
                     ))}
                   </nav>
                 </div>
-                <button
-                  type="button"
-                  className="mt-4 w-full rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
-                >
-                  Browse Students
-                </button>
-                <button
-                  type="button"
-                  className="mt-4 w-full rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
-                >
-                  Edit Profile
-                </button>
-                <button
-                  type="button"
-                  className="mt-4 w-full rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
-                  onClick={handleDeleteClick}
-                >
-                  Logout
-                </button>
+                {user !== null ? (
+                <>
+                  <button
+                    type="button"
+                    className="mt-4 w-full rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                  >
+                    Browse Students
+                  </button>
+                  <button
+                    type="button"
+                    className="mt-4 w-full rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                  >
+                    Edit Profile
+                  </button>
+                  <button
+                    type="button"
+                    className="mt-4 w-full rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                    onClick={handleDeleteClick}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <Link to="/">
+                <button type="button"
+                    className="mt-4 w-full rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                  >Log in</button>
+                </Link>
+              )}
                 {showModal && user && (
                   <div className="fixed top-0 left-0 flex h-full w-full items-center justify-center">
                     <div className="absolute top-0 h-[700px] w-full bg-gray-900 opacity-50"></div>

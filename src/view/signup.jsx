@@ -3,6 +3,9 @@ import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSignUp } from "../hooks/useSignUp";
 import Spinner from '../components/spinner';
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 
 function Signup() {
@@ -21,6 +24,13 @@ function Signup() {
   const handleSubmit = async (e) => {
     setSpin(true);
     e.preventDefault();
+    if (!username || !password || !confirmPassword) {
+      toast.error("Username and password fields are required.");
+      setTimeout(()=>{
+        setSpin(false);
+      }, 1000)
+      return;
+    }
 
     console.log(formData);
     await signup(username, password, confirmPassword);
@@ -29,6 +39,7 @@ function Signup() {
 
   return (
     <section>
+      <ToastContainer />
       <div className="lg:mt-12 grid grid-cols-1 lg:grid-cols-2">
         <div className="flex items-center justify-center px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-24">
           <div className="xl:mx-auto xl:w-full xl:max-w-sm 2xl:max-w-md">

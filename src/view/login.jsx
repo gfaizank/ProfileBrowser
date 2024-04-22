@@ -18,9 +18,15 @@ function Login() {
   };
 
   const handleSubmit = async (e) => {
-
     setSpin(true);
     e.preventDefault();
+    if (!username || !password) {
+      toast.error("Username and password are required.");
+      setTimeout(()=>{
+        setSpin(false);
+      }, 1000)
+      return;
+    }
 
     try {
       await login(username, password);
@@ -101,6 +107,15 @@ function Login() {
                     {!spin && "Sign In"}
                   </button>
                   {error && <div className="error">{error}</div>}
+
+                  <div>
+                    <Link to="/home" className="flex justify-center mt-4 items-center">
+                      Continue as a{" "}
+                      <span className="text-blue-500 hover:underline ml-1">
+                        Guest user
+                      </span>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </form>

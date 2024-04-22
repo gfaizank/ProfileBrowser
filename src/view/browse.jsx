@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/navbar";
 import { MdDelete } from "react-icons/md";
+import Avatar from "../components/avatar";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 function Browse() {
@@ -11,6 +14,14 @@ function Browse() {
 
   const [users, setUsers] = useState([]);
 
+  const handleDeleteClick = () => {
+    toast.warning("You are not authorized for this action.");
+  };
+  
+  const handleEditClick = () => {
+    toast.warning("You are not authorized for this action.");
+  };
+
   useEffect(() => {
     // Fetch data from the API when the component mounts
     fetch("http://localhost:8000/people/allPeople")
@@ -18,6 +29,14 @@ function Browse() {
       .then((data) => setUsers(data))
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
+
+  const getRandomPhoto = () => {
+    const photos = [
+      "https://media.istockphoto.com/id/1317804578/photo/one-businesswoman-headshot-smiling-at-the-camera.jpg?s=612x612&w=0&k=20&c=EqR2Lffp4tkIYzpqYh8aYIPRr-gmZliRHRxcQC5yylY=",
+      "https://media.istockphoto.com/id/1351147752/photo/studio-portrait-of-attractive-20-year-old-bearded-man.jpg?s=612x612&w=0&k=20&c=-twL1NKKad6S_EPrGSniewjh6776A0Ju27ExMh7v_kI="
+    ];
+    return photos[Math.floor(Math.random() * photos.length)];
+  };
 
   const handleDropdownToggle = () => setDropdownOpen(!dropdownOpen);
 
@@ -41,8 +60,20 @@ function Browse() {
     });
   };
 
+  const filteredUsers = users.filter((user) => {
+    const searchLowerCase = searchQuery.toLowerCase();
+    return (
+      user.username && user.username.toLowerCase().includes(searchLowerCase) ||
+      user.location && user.location.toLowerCase().includes(searchLowerCase) ||
+      user.fieldOfInterest && user.fieldOfInterest.some((interest) =>
+        interest.toLowerCase().includes(searchLowerCase)
+      )
+    );
+  });
+
   return (
     <div className="flex flex-col">
+      <ToastContainer />
       <Navbar />
 
       <div className="relative overflow-x-auto shadow-md sm:rounded-lg mx-28 mt-12">
@@ -126,7 +157,7 @@ function Browse() {
             </tr>
           </thead>
           <tbody>
-            {users.map(user => (
+            {filteredUsers.map(user => (
               <tr key={user.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                 <td className="w-4 p-4">
                   <div className="flex items-center">
@@ -141,7 +172,7 @@ function Browse() {
                   </div>
                 </td>
                 <th scope="row" className="flex items-center px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                  <img className="w-10 h-10 rounded-full" src={user.gravatar} alt={`${user.name}'s profile`} />
+                   <div className="mr-4"><Avatar imageUrl={getRandomPhoto()} /></div>
                   <div className="pl-3">
                     <div className="text-base font-semibold">{user.username}</div>
                     <div className="text-gray-500">{user.email}</div>
@@ -160,8 +191,8 @@ function Browse() {
                   {user.status}
                 </td>
                 <td className="flex flex-row items-center px-6 py-4">
-                  <a href="#" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit user</a>
-                  <MdDelete className="ml-2 text-red-500 text-lg hover:text-red-300 cursor-pointer" />
+                  <a href="#" onClick={handleEditClick} className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit user</a>
+                  <MdDelete className="ml-2 text-red-500 text-lg hover:text-red-300 cursor-pointer" onClick={handleDeleteClick} />
                 </td>
               </tr>
             ))}
